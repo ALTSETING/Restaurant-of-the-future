@@ -1,51 +1,188 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Restaurant of the Future</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-  </head>
-  <body>
-    <main class="page">
-      <header class="hero">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR Menu</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background:#0b0f1f; color:#fff; }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 18px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; }
+    .card { background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:14px; }
+    .menu { flex: 2; min-width: 320px; }
+    .cart { flex: 1; min-width: 260px; position: sticky; top: 12px; height: fit-content; }
+    h1 { margin: 0 0 8px; }
+    .muted { opacity: .8; font-size: 14px; }
+    .item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.10); }
+    .item:last-child { border-bottom:0; }
+    button { cursor:pointer; border:0; border-radius:10px; padding:10px 12px; font-weight:700; }
+    .btn { background:#ff7a00; color:#000; }
+    .btn2 { background: rgba(255,255,255,.12); color:#fff; }
+    input { width: 100%; padding: 10px 12px; border-radius: 10px; border:1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.25); color:#fff; }
+    .mini { font-size: 13px; opacity: .85; }
+    .total { font-size: 18px; font-weight: 800; margin-top: 10px; }
+    .ok { color: #6dff9a; }
+    .err { color: #ff6d6d; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>QR Menu</h1>
+    <div class="muted">Меню завантажується з <code>/api/menu</code>, замовлення відправляється на <code>/api/orders</code></div>
+
+    <div class="row" style="margin-top:14px;">
+      <div class="card menu">
+        <h2 style="margin:0 0 10px;">Меню</h2>
+        <div id="menuList" class="mini">Loading...</div>
+      </div>
+
+      <div class="card cart">
+        <h2 style="margin:0 0 10px;">Кошик</h2>
+
+        <label class="mini">Table code (поки вручну)</label>
+        <input id="tableCode" placeholder="наприклад: abx92k" value="abx92k" />
+
+        <div id="cartList" style="margin-top:10px;" class="mini">Поки пусто</div>
+
+        <div class="total" id="total">Total: 0 zł</div>
+
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <button class="btn2" id="clearBtn" type="button">Очистити</button>
+          <button class="btn" id="orderBtn" type="button" style="flex:1;">Оформити</button>
+        </div>
+
+        <div id="msg" style="margin-top:12px;" class="mini"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API = ""; // якщо сайт і API на одному домені — лишай порожнім
+
+  const menuListEl = document.getElementById("menuList");
+  const cartListEl = document.getElementById("cartList");
+  const totalEl = document.getElementById("total");
+  const msgEl = document.getElementById("msg");
+  const tableCodeEl = document.getElementById("tableCode");
+
+  let menu = [];
+  let cart = []; // [{product_id, name, price, qty}]
+
+  function money(n){ return (Math.round(n*100)/100).toFixed(2); }
+
+  function renderMenu(){
+    if(!menu.length){
+      menuListEl.textContent = "Меню пусте.";
+      return;
+    }
+    menuListEl.innerHTML = menu.map(m => `
+      <div class="item">
         <div>
-          <p class="eyebrow">QR API демо</p>
-          <h1>Restaurant of the Future</h1>
-          <p class="subtitle">
-            Мінімальний сайт, який підключається до бекенду та показує активне меню.
-          </p>
+          <div style="font-weight:800;">${m.name}</div>
+          <div class="mini">${m.category} · ${money(m.price)} zł</div>
         </div>
-        <div class="hero-card">
-          <h2>Створити замовлення</h2>
-          <form id="order-form">
-            <label>
-              Код столу
-              <input name="tableCode" type="text" placeholder="A12" required />
-            </label>
-            <label>
-              Кількість
-              <input name="quantity" type="number" min="1" max="20" value="1" required />
-            </label>
-            <label>
-              Коментар
-              <input name="comment" type="text" placeholder="Без цибулі" />
-            </label>
-            <button type="submit">Надіслати</button>
-          </form>
-          <p id="order-result" class="result" role="status"></p>
-        </div>
-      </header>
+        <button class="btn" onclick="addToCart(${m.id})">Додати</button>
+      </div>
+    `).join("");
+  }
 
-      <section class="menu">
-        <div class="menu-header">
-          <h2>Меню</h2>
-          <button id="refresh">Оновити</button>
+  function renderCart(){
+    if(!cart.length){
+      cartListEl.textContent = "Поки пусто";
+      totalEl.textContent = "Total: 0 zł";
+      return;
+    }
+    cartListEl.innerHTML = cart.map((c, idx) => `
+      <div class="item">
+        <div>
+          <div style="font-weight:800;">${c.name}</div>
+          <div class="mini">${money(c.price)} zł · qty: ${c.qty}</div>
         </div>
-        <div id="menu-grid" class="menu-grid"></div>
-      </section>
-    </main>
+        <div style="display:flex; gap:6px;">
+          <button class="btn2" onclick="decQty(${idx})">-</button>
+          <button class="btn2" onclick="incQty(${idx})">+</button>
+        </div>
+      </div>
+    `).join("");
 
-    <script src="/static/app.js"></script>
-  </body>
+    const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+    totalEl.textContent = `Total: ${money(total)} zł`;
+  }
+
+  window.addToCart = (id) => {
+    const p = menu.find(x => x.id === id);
+    if(!p) return;
+    const ex = cart.find(x => x.product_id === id);
+    if(ex) ex.qty += 1;
+    else cart.push({ product_id: id, name: p.name, price: p.price, qty: 1 });
+    renderCart();
+  }
+
+  window.incQty = (idx) => { cart[idx].qty += 1; renderCart(); }
+  window.decQty = (idx) => {
+    cart[idx].qty -= 1;
+    if(cart[idx].qty <= 0) cart.splice(idx, 1);
+    renderCart();
+  }
+
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    cart = [];
+    msgEl.textContent = "";
+    renderCart();
+  });
+
+  async function loadMenu(){
+    menuListEl.textContent = "Loading...";
+    const res = await fetch(API + "/api/menu");
+    menu = await res.json();
+    renderMenu();
+  }
+
+  document.getElementById("orderBtn").addEventListener("click", async () => {
+    msgEl.textContent = "";
+    msgEl.className = "mini";
+
+    const table_code = tableCodeEl.value.trim();
+    if(!table_code){
+      msgEl.textContent = "Вкажи table_code";
+      msgEl.className = "mini err";
+      return;
+    }
+    if(!cart.length){
+      msgEl.textContent = "Кошик пустий";
+      msgEl.className = "mini err";
+      return;
+    }
+
+    const payload = {
+      table_code,
+      items: cart.map(c => ({ product_id: c.product_id, qty: c.qty, comment: "" }))
+    };
+
+    try{
+      const res = await fetch(API + "/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if(!res.ok){
+        msgEl.textContent = "Помилка: " + (data.detail || JSON.stringify(data));
+        msgEl.className = "mini err";
+        return;
+      }
+
+      msgEl.innerHTML = `<span class="ok">✅ Замовлення створено!</span> order_id: <b>${data.order_id}</b>, status: <b>${data.status}</b>`;
+      cart = [];
+      renderCart();
+    } catch(e){
+      msgEl.textContent = "Network error: " + e;
+      msgEl.className = "mini err";
+    }
+  });
+
+  loadMenu();
+</script>
+</body>
 </html>
