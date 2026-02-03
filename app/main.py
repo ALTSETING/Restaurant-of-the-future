@@ -1,9 +1,13 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import List, Literal, Dict
 from datetime import datetime
 
-app = FastAPI(title = "QR API")
+app = FastAPI(title="QR API")
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 MENU_DB = [
@@ -57,12 +61,14 @@ class StatusUpdateIn(BaseModel):
 
 
 #---------РОУТИ---------№
-
+@app.get("/", response_class=HTMLResponse)
+def index():
+    return FileResponse("app/static/index.html")
 
 
 @app.get("/api/menu", response_model=List[MenuItemOut])
 def get_menu():
-    return[m for m in MENU_DB if m["is_active"]]
+    return [m for m in MENU_DB if m["is_active"]]
 
 @app.post("/api/orders", response_model=OrderCreateOut)
 def create_order(payload: OrderCreateIn):
@@ -73,29 +79,25 @@ def create_order(payload: OrderCreateIn):
         product = menu_by_id.get(it.product_id)
         if not product or not product["is_active"]:
             raise HTTPException(
-                status_code=400, 
-                datail=f"Product {it.product_id} unavailable"
-                )
-    
-    NEXT_ORDER_ID +- 1
+                  status_code=400,
+                detail=f"Product {it.product_id} unavailable",
+            )
+
+    NEXT_ORDER_ID += 1
     order_id = NEXT_ORDER_ID
     
     items_snapshot = []
     for it in payload.items:
         product = menu_by_id[it.product_id]
         
-        if not product:
-            raise HTTPException(
-            status_code=400,
-            detail=f"Product {it.product_id} not found"
-            )
+       
             
         items_snapshot.append({
-        "product_id": it.product_id,
-        "name": product["name"],
-        "qty": it.qty,
-        "price_at_time": product["price"],
-        "comment": it.comment,
+            "product_id": it.product_id,
+            "name": product["name"],
+            "qty": it.qty,
+            "price_at_time": product["price"],
+            "comment": it.comment,
         })
     
     
