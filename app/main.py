@@ -10,6 +10,11 @@ app = FastAPI(title="QR API")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
+@app.get("/")
+def home():
+    return FileResponse("app/static/index.html")
+
+
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
     {"id": 2, "name": "Fries", "price": 12.0, "category": "Food", "is_active": True},
