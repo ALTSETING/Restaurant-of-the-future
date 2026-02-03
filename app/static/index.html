@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Restaurant of the Future</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">QR API демо</p>
+          <h1>Restaurant of the Future</h1>
+          <p class="subtitle">
+            Мінімальний сайт, який підключається до бекенду та показує активне меню.
+          </p>
+        </div>
+        <div class="hero-card">
+          <h2>Створити замовлення</h2>
+          <form id="order-form">
+            <label>
+              Код столу
+              <input name="tableCode" type="text" placeholder="A12" required />
+            </label>
+            <label>
+              Кількість
+              <input name="quantity" type="number" min="1" max="20" value="1" required />
+            </label>
+            <label>
+              Коментар
+              <input name="comment" type="text" placeholder="Без цибулі" />
+            </label>
+            <button type="submit">Надіслати</button>
+          </form>
+          <p id="order-result" class="result" role="status"></p>
+        </div>
+      </header>
+
+      <section class="menu">
+        <div class="menu-header">
+          <h2>Меню</h2>
+          <button id="refresh">Оновити</button>
+        </div>
+        <div id="menu-grid" class="menu-grid"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
