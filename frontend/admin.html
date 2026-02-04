@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Orders</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#0b0f1f; color:#fff; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px; }
+    .top { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    select, input { padding:10px 12px; border-radius:10px; background: rgba(0,0,0,.25); color:#fff;
+      border:1px solid rgba(255,255,255,.18); }
+    button { cursor:pointer; border:0; border-radius:10px; padding:10px 12px; font-weight:800; }
+    .btn { background:#ff7a00; color:#000; }
+    .btn2 { background: rgba(255,255,255,.12); color:#fff; }
+    .card { margin-top:12px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+      border-radius:14px; padding:14px; }
+    .row { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .mini { font-size: 13px; opacity:.85; }
+    .items { margin-top:10px; }
+    .tag { display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.10); }
+    .ok { color:#6dff9a; }
+    .err { color:#ff6d6d; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 style="margin:0 0 8px;">Офіціант — замовлення</h1>
+    <div class="mini">Показує <code>/api/kitchen/orders</code> і змінює статус через <code>PATCH /api/orders/{id}/status</code></div>
+
+    <div class="top" style="margin-top:12px;">
+      <label class="mini">Статус:</label>
+      <select id="status">
+        <option value="">Усі</option>
+        <option value="new">new</option>
+        <option value="cooking">cooking</option>
+        <option value="ready">ready</option>
+        <option value="served">served</option>
+        <option value="canceled">canceled</option>
+      </select>
+
+      <label class="mini">Пошук по столу (table_code):</label>
+      <input id="tableSearch" placeholder="наприклад abx92k" />
+
+      <button class="btn2" id="refresh">Оновити</button>
+      <button class="btn2" id="auto">Авто: ON</button>
+
+      <span class="mini" id="info"></span>
+    </div>
+
+    <div id="list" class="mini" style="margin-top:10px;">Loading...</div>
+    <div id="msg" class="mini" style="margin-top:10px;"></div>
+  </div>
+
+<script>
+  const listEl = document.getElementById("list");
+  const statusEl = document.getElementById("status");
+  const tableSearchEl = document.getElementById("tableSearch");
+  const msgEl = document.getElementById("msg");
+  const infoEl = document.getElementById("info");
+
+  let timer = null;
+  let autoOn = true;
+
+  function fmtDate(s){
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toLocaleString();
+  }
+
+  function setMsg(text, ok=true){
+    msgEl.textContent = text;
+    msgEl.className = ok ? "mini ok" : "mini err";
+    if(text) setTimeout(() => { msgEl.textContent = ""; }, 2500);
+  }
+
+  async function load(){
+    const st = statusEl.value;
+    const q = tableSearchEl.value.trim().toLowerCase();
+
+    const url = "/api/kitchen/orders" + (st ? `?status=${st}` : "");
+    const res = await fetch(url);
+    const orders = await res.json();
+
+    let filtered = orders;
+    if(q){
+      filtered = orders.filter(o => String(o.table_code || "").toLowerCase().includes(q));
+    }
+
+    infoEl.textContent = `Показано: ${filtered.length}`;
+
+    if(!filtered.length){
+      listEl.textContent = "Немає замовлень.";
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(o => `
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:900; font-size:18px;">Order #${o.order_id}</div>
+            <div class="mini">
+              Table: <span class="tag"><b>${o.table_code}</b></span>
+              · Status: <span class="tag"><b>${o.status}</b></span>
+              · ${fmtDate(o.created_at)}
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn2" onclick="setStatus(${o.order_id}, 'cooking')">Прийнято</button>
+            <button class="btn2" onclick="setStatus(${o.order_id}, 'ready')">Готово</button>
+            <button class="btn2" onclick="setStatus(${o.order_id}, 'served')">Видано</button>
+            <button class="btn2" onclick="setStatus(${o.order_id}, 'canceled')">Скасувати</button>
+          </div>
+        </div>
+
+        <div class="items">
+          ${(o.items || []).map(i => `
+            <div class="mini">• <b>${i.name}</b> x${i.qty} (${i.price_at_time} zł) ${i.comment ? "— " + i.comment : ""}</div>
+          `).join("")}
+        </div>
+      </div>
+    `).join("");
+  }
+
+  window.setStatus = async (orderId, status) => {
+    const res = await fetch(`/api/orders/${orderId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+
+    if(!res.ok){
+      const data = await res.json().catch(()=>({}));
+      setMsg("Помилка: " + (data.detail || res.status), false);
+      return;
+    }
+    setMsg(`✅ Order #${orderId} → ${status}`);
+    load();
+  }
+
+  document.getElementById("refresh").addEventListener("click", load);
+
+  document.getElementById("auto").addEventListener("click", () => {
+    autoOn = !autoOn;
+    document.getElementById("auto").textContent = "Авто: " + (autoOn ? "ON" : "OFF");
+    if(autoOn){
+      timer = setInterval(load, 4000);
+    } else {
+      clearInterval(timer);
+      timer = null;
+    }
+  });
+
+  statusEl.addEventListener("change", load);
+  tableSearchEl.addEventListener("input", () => { setTimeout(load, 200); });
+
+  load();
+  timer = setInterval(load, 4000);
+</script>
+</body>
+</html>
