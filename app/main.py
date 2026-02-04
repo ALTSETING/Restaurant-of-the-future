@@ -1,4 +1,6 @@
+import os
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -8,9 +10,24 @@ from pathlib import Path
 
 app = FastAPI(title="QR API")
 
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+if allowed_origins_env.strip() == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
@@ -65,7 +82,10 @@ class StatusUpdateIn(BaseModel):
 #---------РОУТИ---------№
 @app.get("/", response_class=HTMLResponse)
 def index():
-    return FileResponse("app/static/index.html")
+    index_file = STATIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return FileResponse(BASE_DIR / "admin.html")
 
 
 @app.get("/api/menu", response_model=List[MenuItemOut])
