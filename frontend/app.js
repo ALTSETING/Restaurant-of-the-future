@@ -5,6 +5,8 @@ const orderResult = document.getElementById("order-result");
 
 let selectedProductId = null;
 
+const API_BASE_URL = "https://restaurant-of-the-future.onrender.com";
+
 const formatPrice = (value) => `${value.toFixed(2)} ₴`;
 
 const renderMenu = (items) => {
@@ -37,7 +39,7 @@ const renderMenu = (items) => {
 };
 
 const fetchMenu = async () => {
-  const response = await fetch("/api/menu");
+  const response = await fetch(`${API_BASE_URL}/api/menu`);
   if (!response.ok) {
     throw new Error("Не вдалося завантажити меню");
   }
@@ -54,7 +56,7 @@ const loadMenu = async () => {
 };
 
 const createOrder = async (payload) => {
-  const response = await fetch("/api/orders", {
+  const response = await fetch(`${API_BASE_URL}/api/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -62,12 +64,17 @@ const createOrder = async (payload) => {
     body: JSON.stringify(payload),
   });
 
+   const isJson = response.headers.get("content-type")?.includes("application/json");
+   const data = isJson ? await response.json() : await response.text();
+
   if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.detail || "Не вдалося створити замовлення");
+   if (isJson && data?.detail) {
+      throw new Error(data.detail);
+    }
+    throw new Error(typeof data === "string" && data ? data : "Не вдалося створити замовлення");
   }
 
-  return response.json();
+  return data;
 };
 
 refreshButton.addEventListener("click", loadMenu);
