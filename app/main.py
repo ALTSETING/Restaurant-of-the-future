@@ -13,7 +13,9 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.get("/")
 def home():
     return FileResponse("app/static/index.html")
-
+@app.get("/admin")
+def admin_page():
+    return FileResponse("app/static/admin.html")
 
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
