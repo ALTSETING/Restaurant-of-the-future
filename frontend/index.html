@@ -175,7 +175,10 @@
 
       msgEl.innerHTML = `<span class="ok">✅ Замовлення створено!</span> order_id: <b>${data.order_id}</b>, status: <b>${data.status}</b>`;
       cart = [];
-      renderCart();
+      renderCart(); 
+      setTimeout(() => {
+        window.location.href = "admin.html";
+      }, 600);
     } catch(e){
       msgEl.textContent = "Network error: " + e;
       msgEl.className = "mini err";
