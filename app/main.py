@@ -4,18 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import List, Literal, Dict
 from datetime import datetime
+from pathlib import Path
 
 app = FastAPI(title="QR API")
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-
-@app.get("/")
-def home():
-    return FileResponse("app/static/index.html")
-@app.get("/admin")
-def admin_page():
-    return FileResponse("app/static/admin.html")
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
