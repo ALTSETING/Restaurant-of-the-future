@@ -103,6 +103,9 @@ orderForm.addEventListener("submit", async (event) => {
   try {
     const result = await createOrder(payload);
     orderResult.textContent = `Замовлення #${result.order_id} створено. Статус: ${result.status}.`;
+    setTimeout(() => {
+      window.location.href = "admin.html";
+    }, 600);
   } catch (error) {
     orderResult.textContent = error.message;
   }
