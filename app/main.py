@@ -25,9 +25,10 @@ app.add_middleware(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
+
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
@@ -71,6 +72,7 @@ class OrderCreateOut(BaseModel):
 
 class KitchenOrderOut(BaseModel):
     order_id: int
+    table_code: str
     status: OrderStatus
     created_at: datetime
     items: List[dict]
@@ -85,10 +87,18 @@ class StatusUpdateIn(BaseModel):
 #---------РОУТИ---------№
 @app.get("/", response_class=HTMLResponse)
 def index():
-    index_file = STATIC_DIR / "index.html"
+    index_file = FRONTEND_DIR / "index.html"
     if index_file.exists():
         return FileResponse(index_file)
-    return FileResponse(BASE_DIR / "admin.html")
+    raise HTTPException(status_code=404, detail="index.html not found")
+
+
+@app.get("/admin", response_class=HTMLResponse)
+def admin_page():
+    admin_file = FRONTEND_DIR / "admin.html"
+    if admin_file.exists():
+        return FileResponse(admin_file)
+    raise HTTPException(status_code=404, detail="admin.html not found")
 
 
 @app.get("/api/menu", response_model=List[MenuItemOut])
