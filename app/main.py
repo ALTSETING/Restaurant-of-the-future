@@ -33,7 +33,10 @@ MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
     {"id": 2, "name": "Fries", "price": 12.0, "category": "Food", "is_active": True},
     {"id": 3, "name": "Cola", "price": 9.0, "category": "Drinks", "is_active": True},
+    {"id": 4, "name": "Beer", "price": 15.0, "category": "Drinks", "is_active": True},
+    {"id": 5, "name": "Pizza", "price": 31.0, "category": "Food", "is_active": True},
 ]
+
 
 ORDERS_DB: Dict[int, dict] = {}
 NEXT_ORDER_ID = 100
