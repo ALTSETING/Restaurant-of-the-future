@@ -1,4 +1,6 @@
-const API = ""; // якщо сайт і API на одному домені — лишай порожнім
+const API = window.location.hostname.endsWith("vercel.app")
+  ? "https://restaurant-of-the-future.onrender.com"
+  : ""; // якщо сайт і API на одному домені
 
 const menuListEl = document.getElementById("menuList");
 const cartListEl = document.getElementById("cartList");
