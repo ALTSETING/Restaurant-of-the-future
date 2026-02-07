@@ -30,6 +30,12 @@ FRONTEND_DIR = BASE_DIR.parent / "frontend"
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
+def frontend_file_response(filename: str) -> FileResponse:
+    file_path = FRONTEND_DIR / filename
+    if file_path.exists():
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail=f"{filename} not found")
+    
 MENU_DB = [
     {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
     {"id": 2, "name": "Fries", "price": 12.0, "category": "Food", "is_active": True},
@@ -87,18 +93,31 @@ class StatusUpdateIn(BaseModel):
 #---------РОУТИ---------№
 @app.get("/", response_class=HTMLResponse)
 def index():
-    index_file = FRONTEND_DIR / "index.html"
-    if index_file.exists():
-        return FileResponse(index_file)
-    raise HTTPException(status_code=404, detail="index.html not found")
-
+    return frontend_file_response("index.html")
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_page():
-    admin_file = FRONTEND_DIR / "admin.html"
-    if admin_file.exists():
-        return FileResponse(admin_file)
-    raise HTTPException(status_code=404, detail="admin.html not found")
+    return frontend_file_response("admin.html")
+
+
+@app.get("/styles.css")
+def styles_css():
+    return frontend_file_response("styles.css")
+
+
+@app.get("/app.js")
+def app_js():
+    return frontend_file_response("app.js")
+
+
+@app.get("/admin.css")
+def admin_css():
+    return frontend_file_response("admin.css")
+
+
+@app.get("/admin.js")
+def admin_js():
+    return frontend_file_response("admin.js")
 
 
 @app.get("/api/menu", response_model=List[MenuItemOut])
