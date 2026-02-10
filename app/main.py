@@ -37,18 +37,18 @@ def frontend_file_response(filename: str) -> FileResponse:
     raise HTTPException(status_code=404, detail=f"{filename} not found")
     
 MENU_DB = [
-    {"id": 1, "name": "Burger", "price": 35.0, "category": "Food", "is_active": True},
-    {"id": 2, "name": "Fries", "price": 12.0, "category": "Food", "is_active": True},
+    {"id": 1, "name": "Burger", "price": 35.0, "category": "Hot", "is_active": True},
+    {"id": 2, "name": "Fries", "price": 12.0, "category": "Hot", "is_active": True},
     {"id": 3, "name": "Cola", "price": 9.0, "category": "Drinks", "is_active": True},
     {"id": 4, "name": "Beer", "price": 15.0, "category": "Drinks", "is_active": True},
-    {"id": 5, "name": "Pizza", "price": 31.0, "category": "Food", "is_active": True},
+    {"id": 5, "name": "Pizza", "price": 31.0, "category": "Hot", "is_active": True},
+    {"id": 6, "name": "Cake", "price": 21.0, "category": "Desserts", "is_active": True},
 ]
-
 
 ORDERS_DB: Dict[int, dict] = {}
 NEXT_ORDER_ID = 100
 
-OrderStatus = Literal["new", "cooking", "ready", "served", "canceled"]
+OrderStatus = Literal["new", "canceled"]
 
 class MenuItemOut(BaseModel):
     id: int
@@ -78,7 +78,6 @@ class OrderCreateOut(BaseModel):
 
 class KitchenOrderOut(BaseModel):
     order_id: int
-    table_code: str
     status: OrderStatus
     created_at: datetime
     items: List[dict]
@@ -91,38 +90,18 @@ class StatusUpdateIn(BaseModel):
 
 
 #---------РОУТИ---------№
-@app.get("/", response_class=HTMLResponse)
-def index():
-    return frontend_file_response("index.html")
 
-@app.get("/admin", response_class=HTMLResponse)
-def admin_page():
-    return frontend_file_response("admin.html")
-
-
-@app.get("/styles.css")
-def styles_css():
-    return frontend_file_response("styles.css")
-
-
-@app.get("/app.js")
-def app_js():
-    return frontend_file_response("app.js")
-
-
-@app.get("/admin.css")
-def admin_css():
-    return frontend_file_response("admin.css")
-
-
-@app.get("/admin.js")
-def admin_js():
-    return frontend_file_response("admin.js")
 
 
 @app.get("/api/menu", response_model=List[MenuItemOut])
-def get_menu():
-    return [m for m in MENU_DB if m["is_active"]]
+def get_menu(category: Optional[str] = Query(default=None)):
+    items = [m for m in MENU_DB if m["is_active"]]
+
+    if category:
+        category_l = category.strip().lower()
+        items = [m for m in items if m["category"].strip().lower() == category_l]
+
+    return items
 
 @app.post("/api/orders", response_model=OrderCreateOut)
 def create_order(payload: OrderCreateIn):
@@ -133,7 +112,7 @@ def create_order(payload: OrderCreateIn):
         product = menu_by_id.get(it.product_id)
         if not product or not product["is_active"]:
             raise HTTPException(
-                  status_code=400,
+                status_code=400,
                 detail=f"Product {it.product_id} unavailable",
             )
 
