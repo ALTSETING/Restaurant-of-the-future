@@ -12,10 +12,15 @@
   <div class="wrap">
     <h1>QR Menu</h1>
     <div class="muted">Меню завантажується з <code>/api/menu</code>, замовлення відправляється на <code>/api/orders</code></div>
-
+    <div id="filters" class="filters">
+      <button class="btn3" type="button" data-cat="">Wszystko</button>
+      <button class="btn3" type="button" data-cat="Drinks">Napoje</button>
+      <button class="btn3" type="button" data-cat="Hot">Dania gorące</button>
+      <button class="btn3" type="button" data-cat="Desserts">Desery</button>
+    </div>
     <div class="row mt14">
       <div class="card menu">
-        <h2 class="h2">Меню</h2>
+        <h2 class="h2">Menu</h2>
         <div id="menuList" class="mini">Loading...</div>
       </div>
 
@@ -31,7 +36,7 @@
 
         <div class="actions">
           <button class="btn2" id="clearBtn" type="button">Wyczyść</button>
-          <button class="btn grow" id="orderBtn" type="button">Złóż zamówienie</button>
+          <button class="btn" id="orderBtn" type="button">Złóż zamówienie</button>
         </div>
 
         <div id="msg" class="mini mt12"></div>
@@ -41,3 +46,4 @@
 
 </body>
 </html>
+
