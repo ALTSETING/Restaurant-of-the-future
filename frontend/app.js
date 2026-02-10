@@ -130,12 +130,37 @@ document.getElementById("clearBtn").addEventListener("click", () => {
   renderCart();
 });
 
-async function loadMenu() {
+let currentCategory = "";
+
+async function loadMenu(category = "") {
   menuListEl.textContent = "Loading...";
-  const res = await fetch(API + "/api/menu");
+
+  const qs = category ? `?category=${encodeURIComponent(category)}` : "";
+  const res = await fetch(API + "/api/menu" + qs);
+
   menu = await res.json();
   renderMenu();
 }
+
+
+const filterBtns = Array.from(document.querySelectorAll("#filters [data-cat]"));
+
+function setActiveFilterBtn(cat) {
+  filterBtns.forEach(b =>
+    b.classList.toggle("is-active", (b.dataset.cat || "") === (cat || ""))
+  );
+}
+
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentCategory = btn.dataset.cat || "";
+    setActiveFilterBtn(currentCategory);
+    loadMenu(currentCategory);
+  });
+});
+
+// при старті активний "Усі"
+setActiveFilterBtn("");
 
 document.getElementById("orderBtn").addEventListener("click", async () => {
   msgEl.textContent = "";
