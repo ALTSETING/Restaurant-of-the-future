@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from typing import List, Literal, Dict
+from typing import List, Literal, Dict, Optional
 from datetime import datetime
 from pathlib import Path
 
