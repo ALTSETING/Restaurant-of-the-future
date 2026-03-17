@@ -7,6 +7,10 @@ const infoEl = document.getElementById("info");
 const refreshBtn = document.getElementById("refresh");
 const autoBtn = document.getElementById("auto");
 
+const API = window.location.hostname.endsWith("vercel.app")
+  ? "https://restaurant-of-the-future.onrender.com"
+  : ""; // якщо сайт і API на одному домені
+
 // ---- TABLE FILTERS ----
 const TABLES = ["A1","A2","A3","B1","B2"]; // <-- твої столики
 const selectedTables = new Set(); // пусто = показувати всі
