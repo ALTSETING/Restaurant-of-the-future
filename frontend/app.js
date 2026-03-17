@@ -8,6 +8,7 @@ const totalEl = document.getElementById("total");
 const msgEl = document.getElementById("msg");
 const tableCodeEl = document.getElementById("tableCode");
 
+
 let menu = [];
 let cart = []; // [{product_id, name, price, qty, comment}]
 
