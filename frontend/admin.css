@@ -112,3 +112,196 @@ code {
   background: rgba(255, 122, 0, .18);
   border: 1px solid rgba(255, 122, 0, .35);
 }
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b0f1f;
+  color:#fff;
+}
+
+.wrap{
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.title{
+  margin:0 0 8px;
+}
+
+.top{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:12px;
+}
+
+select, input{
+  padding:10px 12px;
+  border-radius:10px;
+  background: rgba(0,0,0,.25);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+button{
+  cursor:pointer;
+  border:0;
+  border-radius:10px;
+  padding:10px 12px;
+  font-weight:800;
+}
+
+.btn{ background:#ff7a00; color:#000; }
+.btn2{ background: rgba(255,255,255,.12); color:#fff; }
+
+.card{
+  margin-top:12px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:14px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.mini{
+  font-size: 13px;
+  opacity:.85;
+}
+
+.items{ margin-top:10px; }
+
+.tag{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.10);
+}
+
+.ok{ color:#6dff9a; }
+.err{ color:#ff6d6d; white-space: pre-wrap; }
+
+.list{ margin-top:10px; }
+.msg{ margin-top:10px; }
+.btnMini{
+  margin-left: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 0;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.btn1{
+  background: rgba(255, 80, 80, .25);
+  color:#fff;
+}
+
+.tagComment{
+  display:inline-block;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+}
+
+.commentWrap{
+  display:none;
+  margin: 6px 0 10px 0;
+}
+
+.commentWrap.show{ display:block; }
+
+.commentInput{
+  width: min(520px, 100%);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.22);
+  color:#fff;
+}
+/* Центрування логіну */
+.login-box{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  background:#11182a;
+  padding:30px;
+  border-radius:14px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  width:280px;
+  box-shadow:0 15px 40px rgba(0,0,0,.6);
+}
+
+/* Поля вводу */
+.login-box input{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.15);
+  background:#0f1626;
+  color:#fff;
+  font-size:14px;
+  outline:none;
+  transition:.2s;
+}
+
+.login-box input:focus{
+  border-color:#02d6fc;
+  box-shadow:0 0 0 2px rgba(2,214,252,.25);
+}
+
+/* Кнопка */
+.login-box button{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  background:#02d6fc;
+  color:#000;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.login-box button:hover{
+  opacity:.85;
+}
+
+.blink-btn{
+  padding: 14px 28px;
+  background: transparent;
+  color: white;
+  border: 2px solid #ff7a00;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all .25s ease;
+  animation: borderBlink 1s infinite;
+}
+
+/* мигання тільки рамки */
+@keyframes borderBlink{
+  0%   { box-shadow: 0 0 0px #ff7a00; }
+  50%  { box-shadow: 0 0 12px #ff7a00; }
+  100% { box-shadow: 0 0 0px #ff7a00; }
+}
+
+/* звичайний стан після кліку */
+.blink-btn.active{
+  animation: none;
+  box-shadow: none;
+  border-color: #555;
+  background: #222;
+}
