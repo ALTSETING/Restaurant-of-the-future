@@ -7,9 +7,11 @@ const infoEl = document.getElementById("info");
 const refreshBtn = document.getElementById("refresh");
 const autoBtn = document.getElementById("auto");
 
-const API = window.location.hostname.endsWith("vercel.app")
-  ? "https://restaurant-of-the-future.onrender.com"
-  : ""; // якщо сайт і API на одному домені
+const API = window.__API_BASE__
+  || ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? ""
+    : "https://restaurant-of-the-future.onrender.com");
+
 
 // ---- TABLE FILTERS ----
 const TABLES = ["A1","A2","A3","B1","B2"]; // <-- твої столики
@@ -124,7 +126,7 @@ async function load() {
     const q = tableSearchEl.value.trim().toLowerCase();
 
     const url = "/api/kitchen/orders" + (st ? `?status=${encodeURIComponent(st)}` : "");
-    const res = await fetch(url);
+    const res = await fetch(API + url);
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -214,7 +216,7 @@ window.setStatus = async (orderId, status, btnEl) => {
     btnEl.classList.add("active");
   }
 
-  const res = await fetch(`/api/orders/${orderId}/status`, {
+ const res = await fetch(API + `/api/orders/${orderId}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status })
@@ -251,7 +253,7 @@ window.deleteOrder = async (orderId, btnEl) => {
   autoOn = false;
   if (timer) { clearInterval(timer); timer = null; }
 
-  const res = await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
+  const res = await fetch(API + `/api/orders/${orderId}`, { method: "DELETE" });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
