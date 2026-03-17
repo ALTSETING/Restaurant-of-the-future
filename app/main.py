@@ -133,6 +133,14 @@ def update_status(order_id: int, payload: StatusUpdateIn):
     order["status"] = payload.status
     return {"ok": True, "order_id": order_id, "status": order["status"]}
 
+@app.delete("/api/orders/{order_id}")
+def delete_order(order_id: int):
+    order = ORDERS_DB.pop(order_id, None)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"ok": True, "order_id": order_id}
+
+
 # ------------------ Frontend ------------------
 if not FRONTEND_DIR.exists():
     raise RuntimeError(f"FRONTEND_DIR not found: {FRONTEND_DIR}")
